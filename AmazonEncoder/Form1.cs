@@ -1,12 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Data;
-using System.Text;
-using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
-using System.ComponentModel;
-using System.Collections.Generic;
 
 namespace AmazonEncoder
 {
@@ -25,7 +20,7 @@ namespace AmazonEncoder
 
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Multiselect = true;
-            if (ofd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (ofd.ShowDialog() == DialogResult.OK)
             {
                 int count = ofd.FileNames.GetLength(0); // Gets the number of files selected
                 label2.Text = String.Format("0 of {0} Completed", count); // Updates the form to show starting status
