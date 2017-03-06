@@ -13,22 +13,19 @@ namespace AmazonEncoder
         }
 
         // Represents the first bytes of a PNG file
-        byte[] pngHeader = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+        readonly byte[] _pngHeader = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
 
         private void button1_Click(object sender, EventArgs e)
         {
 
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Multiselect = true;
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                int count = ofd.FileNames.GetLength(0); // Gets the number of files selected
-                label2.Text = String.Format("0 of {0} Completed", count); // Updates the form to show starting status
-                progressBar1.Value = 0; // Reset the progress bar's value to 0 in case there is multiple uses in this instance
-                progressBar1.Maximum = count; // Sets the maximum of the progress bar to the number of files selected
-                Thread x = new Thread(() => EncodeFiles(ofd.FileNames, count, checkBox1.Checked)); // Creates the new thread which encodes the files
-                x.Start(); // Starts the thread
-            }
+            OpenFileDialog ofd = new OpenFileDialog {Multiselect = true};
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+            int count = ofd.FileNames.GetLength(0); // Gets the number of files selected
+            label2.Text = $@"0 of {count} Completed"; // Updates the form to show starting status
+            progressBar1.Value = 0; // Reset the progress bar's value to 0 in case there is multiple uses in this instance
+            progressBar1.Maximum = count; // Sets the maximum of the progress bar to the number of files selected
+            Thread x = new Thread(() => EncodeFiles(ofd.FileNames, count, checkBox1.Checked)); // Creates the new thread which encodes the files
+            x.Start(); // Starts the thread
         }
 
         void EncodeFiles(string[] filepaths, int total, bool delete)
@@ -38,9 +35,9 @@ namespace AmazonEncoder
             {
                 FileInfo fi = new FileInfo(f); // Used for getting the original file name
                 byte[] b = File.ReadAllBytes(f); // Get original files' bytes
-                byte[] ret = new byte[pngHeader.Length + b.Length]; // Create a new byte array the length of the PNG header + the length of original file
-                Buffer.BlockCopy(pngHeader, 0, ret, 0, pngHeader.Length); // Copies the PNG header bytes to the beginning of the new byte array
-                Buffer.BlockCopy(b, 0, ret, pngHeader.Length, b.Length); // Copies the original file bytes to into the new byte array, after the PNG header
+                byte[] ret = new byte[_pngHeader.Length + b.Length]; // Create a new byte array the length of the PNG header + the length of original file
+                Buffer.BlockCopy(_pngHeader, 0, ret, 0, _pngHeader.Length); // Copies the PNG header bytes to the beginning of the new byte array
+                Buffer.BlockCopy(b, 0, ret, _pngHeader.Length, b.Length); // Copies the original file bytes to into the new byte array, after the PNG header
 
                 string adrive = String.Concat(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), @"\Amazon Drive\"); // Get Amazon Drive path
                 string newname = String.Concat(adrive, fi.Name, "-encoded.png"); // Create new name based on old file
@@ -57,12 +54,13 @@ namespace AmazonEncoder
                 {
                     done += 1;
                     progressBar1.Value += 1;
-                    label2.Text = String.Format("{0} of {1} Completed", done, total);
+                    label2.Text = $@"{done} of {total} Completed";
                 }));
             }
 
             // Notify the user of completion
-            Invoke(new MethodInvoker(() => MessageBox.Show(String.Format("{0} files have been encoded and written to the Amazon Drive folder.", total), "Done", MessageBoxButtons.OK, MessageBoxIcon.Information)));
+            Invoke(new MethodInvoker(() => MessageBox.Show(
+                $@"{total} files have been encoded and written to the Amazon Drive folder.", @"Done", MessageBoxButtons.OK, MessageBoxIcon.Information)));
         }
     }
 }
