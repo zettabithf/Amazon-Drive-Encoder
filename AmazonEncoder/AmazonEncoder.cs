@@ -71,8 +71,8 @@ namespace AmazonEncoder
                     if(chk_DeleteOriginal.Checked)
                         fi.Delete();
                 }
+                _worker.ReportProgress(1);
             }
-            _worker.ReportProgress(1);
         }
     }
 }
