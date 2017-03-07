@@ -42,14 +42,23 @@ namespace AmazonEncoder
             foreach (string f in filepaths)
             {
                 FileInfo fi = new FileInfo(f); // Used for getting the original file name
-                byte[] b = File.ReadAllBytes(f); // Get original files' bytes
-                byte[] ret = new byte[pngHeader.Length + b.Length]; // Create a new byte array the length of the PNG header + the length of original file
-                Buffer.BlockCopy(pngHeader, 0, ret, 0, pngHeader.Length); // Copies the PNG header bytes to the beginning of the new byte array
-                Buffer.BlockCopy(b, 0, ret, pngHeader.Length, b.Length); // Copies the original file bytes to into the new byte array, after the PNG header
-
                 string adrive = String.Concat(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), @"\Amazon Drive\"); // Get Amazon Drive path
                 string newname = String.Concat(adrive, fi.Name, "-encoded.png"); // Create new name based on old file
-                File.WriteAllBytes(newname, ret); // Write new file to Amazon Drive folder
+                using (FileStream fsSource = File.OpenRead(f)) // Opens original file for reading
+                {
+                    using (FileStream fsDest = File.OpenWrite(newname)) // Creates and opens the new file for writing
+                    {
+                        fsDest.Write(pngHeader, 0, pngHeader.Length); // Writes the PNG header as the first bytes of the file
+                        byte[] buffer = new byte[2097152]; // Creates a buffer of 2MB to avoid an OutOfMemory exception
+                        int bytesRead = 0; // Used to tell how many bytes have been read into the buffer
+                        while ((bytesRead = fsSource.Read(buffer, 0, buffer.Length)) > 0) // Reads the file in 2MB chunks until it reaches the end of the file
+                        {
+                            fsDest.Write(buffer, 0, bytesRead); // Writes the 2MB chunks to the new file
+                        }
+                        fsDest.Close();
+                    }
+                    fsSource.Close();
+                }
 
                 // Delete old file if necessary
                 if (delete)
