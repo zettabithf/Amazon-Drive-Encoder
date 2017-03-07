@@ -55,13 +55,19 @@ namespace AmazonEncoder
 
         private void StartEncoding(object sender, DoWorkEventArgs doWorkEventArgs)
         {
+            byte[] buffer = new byte[4096];
             foreach (string f in (string[])doWorkEventArgs.Argument)
             {
                 FileInfo fi = new FileInfo(f); // Used for getting the original file name
                 using (var fs = File.OpenWrite($"{_amazonDrive}{fi.Name}-encoded.png"))
                 {
                     fs.Write(_pngHeader, 0, _pngHeader.Length);
-                    fs.Write(File.ReadAllBytes(f),0,(int)fi.Length);
+                    using (var inFile = File.OpenRead(fi.FullName))
+                    {
+                        int count;
+                        while ((count = inFile.Read(buffer, 0, buffer.Length)) != 0)
+                            fs.Write(buffer, 0, count);
+                    }
                     if(chk_DeleteOriginal.Checked)
                         fi.Delete();
                 }
