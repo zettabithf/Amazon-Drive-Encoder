@@ -22,6 +22,7 @@ namespace AmazonEncoder
             _worker.DoWork += StartEncoding;
             _worker.ProgressChanged += ProgressChanged;
             _worker.RunWorkerCompleted += FinishEncoding;
+            _worker.WorkerReportsProgress = true;
             _fileDialog = new OpenFileDialog {Multiselect = true};
             progressBar.Step = 1;
         }
