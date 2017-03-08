@@ -23,7 +23,7 @@ namespace AmazonDecoder
                 label2.Text = String.Format("0 of {0} Completed", count); // Updates the form to show starting status
                 progressBar1.Value = 0; // Reset the progress bar's value to 0 in case there is multiple uses in this instance
                 progressBar1.Maximum = count; // Sets the maximum of the progress bar to the number of files selected
-                Thread x = new Thread(() => DecodeFiles(ofd.FileNames, count, false)); // Creates the new thread which decodes the files
+                Thread x = new Thread(() => DecodeFiles(ofd.FileNames, count, checkBox1.Checked)); // Creates the new thread which decodes the files
                 x.Start(); // Starts the thread
             }
         }
